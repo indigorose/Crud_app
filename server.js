@@ -17,6 +17,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 	.then((client) => {
 		console.log('Connected to Database');
 		const db = client.db('star-wars-quotes');
+		const quotesCollection = db.collection('quotes');
 
 		// A body parser allows us to deal with the information from the post.
 		// Make sure that we place the body-parser before your CRUD handlers!
@@ -25,13 +26,31 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 		// CRUD Read
 		app.get('/', (req, res) => {
 			res.sendFile(__dirname + '/index.html');
+			const cursor = db
+				.collection('quotes')
+				.find()
+				.toArray()
+				.then((results) => {
+					console.log(results);
+				})
+				.catch((error) => console.error(error));
+			console.log(cursor);
 		});
 
 		// CRUD Create
 		app.post('/quotes', (req, res) => {
+			quotesCollection
+				.insertOne(req.body)
+				.then((result) => {
+					// console.log(result);
+					res.redirect('/');
+				})
+				.catch((error) => console.error(error));
+
 			// With the body parser installed, we should be able to see the values when requested to the console.
-			console.log(req.body);
+			// console.log(req.body);
 		});
+
 		app.listen(3000, function () {
 			console.log('listening on 3000');
 		});
