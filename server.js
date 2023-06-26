@@ -12,7 +12,10 @@ const connectionString = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_
 // 	console.log('Connected to Database');
 // });
 // Connecting to MongoDB using promises
-// TODO - hide the password
+
+// rendering to the HTML using Embedded Javascript
+app.set('view engine', 'ejs');
+
 MongoClient.connect(connectionString, { useUnifiedTopology: true })
 	.then((client) => {
 		console.log('Connected to Database');
@@ -25,15 +28,18 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
 		// CRUD Read
 		app.get('/', (req, res) => {
-			res.sendFile(__dirname + '/index.html');
+			// res.sendFile(__dirname + '/index.html');
+			// res.render(view, locals);
 			const cursor = db
 				.collection('quotes')
 				.find()
 				.toArray()
 				.then((results) => {
-					console.log(results);
+					// console.log(results);
+					res.render('index.ejs', { quotes: results });
 				})
 				.catch((error) => console.error(error));
+
 			console.log(cursor);
 		});
 
