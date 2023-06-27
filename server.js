@@ -15,6 +15,8 @@ const connectionString = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_
 
 // rendering to the HTML using Embedded Javascript
 app.set('view engine', 'ejs');
+app.use(express.static('public'));
+app.use(bodyParser.json());
 
 MongoClient.connect(connectionString, { useUnifiedTopology: true })
 	.then((client) => {
@@ -36,6 +38,7 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 				.toArray()
 				.then((results) => {
 					// console.log(results);
+					// Send the stored database quotes to the DOM/HTML
 					res.render('index.ejs', { quotes: results });
 				})
 				.catch((error) => console.error(error));
@@ -55,6 +58,35 @@ MongoClient.connect(connectionString, { useUnifiedTopology: true })
 
 			// With the body parser installed, we should be able to see the values when requested to the console.
 			// console.log(req.body);
+		});
+
+		// Update a quote
+		app.put('/quotes', (req, res) => {
+			// console.log(req.body);
+			// Search the data based base on query, example being name
+			quotesCollection
+				.findOneAndUpdate(
+					{ name: 'Yoda' },
+					{
+						$set: {
+							name: req.body.name,
+							quote: req.body.quote,
+						},
+					},
+					{
+						upsert: true,
+					}
+				)
+				.then((result) => {
+					console.log(result);
+				})
+				.then((res) => {
+					if (res.ok) return res.json();
+				})
+				.then((response) => {
+					console.log(response);
+				})
+				.catch((error) => console.error(error));
 		});
 
 		app.listen(3000, function () {
